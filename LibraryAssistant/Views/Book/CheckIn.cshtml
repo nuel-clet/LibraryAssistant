@@ -1,0 +1,45 @@
+﻿@model CheckInViewModel
+
+
+<div class="row justify-content-center m-3">
+    <div class="col-sm-8">
+        <div class="card">
+
+            <div class="card-header">
+                <h1>@Model.bookInventory.BookPatron.Name</h1>
+            </div>
+
+            <div class="card-body text-center">
+                <h4>Mobile Number: @Model.bookInventory.BookPatron.MobileNumber</h4>
+                <h4>Return Date: @(Model.ActualReturnDate.ToShortDateString())</h4>
+                <h4>Required Return Date: @(Model.bookInventory.CheckedOutDate.ToShortDateString())</h4>
+                @if (Model.Penalty != 0)
+                {
+                    <h4>Penalty : #@(Model.Penalty * 500)</h4>
+                }
+
+            </div>
+        
+            <div class="card-footer text-center">
+                <a asp-controller="book" asp-action="index" class="btn btn-primary">Back</a>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script type="text/javascript">
+    onload = function () {
+        if ($("refreshed").val() == "no"){
+            location.reload();
+            $("#refreshed").val("yes");
+            console.log(Date.now);
+        }
+    //}
+    //$.ajax({
+    //    url: "",
+    //    context: document.body,
+    //    success: function (s, x) {
+    //        $(this).html(s);
+    //    }
+    //});
+</script>

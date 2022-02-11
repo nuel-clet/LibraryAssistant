@@ -1,0 +1,189 @@
+﻿@model IEnumerable<Book>
+
+@{
+    ViewBag.Title = "Book List";
+}
+
+
+<div class="row g-4 mb-4">
+
+
+    @foreach (var book in Model)
+    {
+
+        <div class="col-md-6 col-lg-3">
+            <div class="card bg-light border-primary mb-3">
+                <div class="card-body text-center my-4">
+
+
+                    <ul class="list-group list-group-flush">
+                        <li class="card-header">@book.Title</li>
+                        <li class="list-group-item">ISBN: @book.ISBN</li>
+                        <li class="list-group-item">PUBLISH YEAR: @book.PublishYear</li>
+                        <li class="list-group-item">COVER PRICE: @book.CoverPrice</li>
+                        <li class="list-group-item">AVAILABILITY: @book.Status </li>
+
+                    </ul>
+                    <div class="btn-toolbar">
+
+                        <div class="btn-group ">
+                            @if (book.Status == true)
+                            {
+                                <a disabled class="btn btn-secondary mt-1 mr-1">
+                                    Check-In
+                                </a>
+                            }
+                            else
+                            {
+                                <a class="btn btn-secondary mt-1 mr-1" asp-controller="book"
+                                   asp-action="CheckIn" asp-route-id="@book.Id">
+                                    Check-In
+                                </a>
+                            }
+
+                        </div>
+
+                        <div class="btn-group ">
+                            @if (book.Status != true)
+                            {
+                                <a disabled class="btn btn-secondary mt-1 mx-auto">
+                                    Check-Out
+                                </a>
+                            }
+                            else
+                            {
+                                <a class="btn btn-secondary mt-1 mx-auto" asp-controller="book"
+                                   asp-action="CheckOut" asp-route-id="@book.Id">
+                                    Check-Out
+                                </a>
+                            }
+
+                        </div>
+
+                        <div class="btn-group">
+                            <input id="details-btn" type="button" class="btn btn-info mt-1 ml-1" data-toggle="modal" data-target="#details"
+                                   data-id="@book.Id" onclick="getDetails(@book.Id)"
+                               value="Details" 
+                            />
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+
+        //MODAL
+        <div class="modal fade" id="details" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="details">Details</h5>
+                       
+                    </div>
+                    <div class="modal-body">
+                        
+                        <div class="card-header">
+                            <h4>Title: <span id="detailsTitle"></span></h4>
+                        </div>
+
+                        <div class="card-body">
+                            <h5>ISBN: <span id="detailsISBN"></span></h5>
+                            <h5>PublishYear: <span id="detailsPublishYear"></span></h5>
+                            <h5>CoverPrice: <span id="detailsCoverprice"></span></h5>
+                            <h5>Status: <span id="detailsStatus"></span></h5>
+                            <h5><span id="detailsPatronName"></span></h5>
+                            <h5><span id="detailsHistory"></span></h5>
+                        </div>
+
+                    </div>
+                   
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section scripts {
+
+    <script type="text/javascript">            
+        function getDetails(bookId) {                    
+                $.ajax({
+                    url: 'Book/Details',
+                    type: 'POST',
+                    data: { Id: bookId },
+                    dataType: "json",
+                    success: function (response) {
+                      
+                        for (var i in response) {
+                            if (Array.isArray(response[i])) {                                                                     
+                                var detailsTitle = response.bookInventory[0].book.title;
+                                var detailsISBN = response.bookInventory[0].book.isbn;
+                                var detailsCoverprice = response.bookInventory[0].book.coverPrice;
+                                var detailsPublishYear = response.bookInventory[0].book.publishYear;
+                                var detailsStatus = "Available";
+                                var patronName = "";                                
+                                $('#detailsHistory').innerHTML = ('History; <br>');
+
+                                for (var item of response.bookInventory) {
+                                    if (item.isCheckedIn) {
+                                        //detailsStatus = 'Available';                                        
+                                    }
+                                    else {
+                                        detailsStatus = 'Not Available';
+                                        patronName = item.bookPatron.name;                                        
+                                    } 
+                                    
+                                    //CHECK OUT HISTORY
+                                    var name = item.bookPatron.name;
+                                    var checkoutDate = item.checkedOutDate;
+                                    var checkInDate = item.checkedInDate;
+
+                                    checkoutDate = checkoutDate.substring(0, 10);                                    
+                                    checkInDate = checkInDate.substring(0, 10);
+                                    var format = ('Name: ' + name + '<br> Checked Out On: ' + checkoutDate + '<br>Checked In On: ' + checkInDate + '<br> <br>');
+                                    document.getElementById("detailsHistory").innerHTML += format;
+                                    format = "";
+
+                                    $(".modal").on("hidden.bs.modal", function () {
+                                        document.getElementById("detailsHistory").innerHTML = format;
+                                    });                                                           
+                                }
+
+                            }
+                            
+                            //SHOULD WE RECEIVE A BOOK OBJECT FROM THE CONTROLLER
+                            //USED FOR TESTING PURPOSES
+                            else {                               
+                                var detailsTitle = response.book.title;
+                                var detailsISBN = response.book.isbn;
+                                var detailsCoverprice = response.book.coverPrice;
+                                var detailsPublishYear = response.book.publishYear;
+                                var detailsStatus;
+                                if (response.book.status) {
+                                    detailsStatus = 'Available';
+                                }
+                                else {
+                                    detailsStatus = 'Not Available';
+                                }                                  
+                            }
+                        }
+                       //POPULATE THE DETAILS IN THE MODAL-BODY
+                        $('#detailsTitle').html(detailsTitle);
+                        $('#detailsISBN').html(detailsISBN);
+                        $('#detailsCoverprice').html(detailsCoverprice);
+                        $('#detailsPublishYear').html(detailsPublishYear);
+                        $('#detailsStatus').html(detailsStatus);  
+                        $('#detailsPatronName').html('Checked Out by: ' + patronName);
+                                                 
+                    },                   
+                    failure: function (response) {
+                        console.log('this is from failure');
+                        console.log(response);
+                    }
+                });
+          };        
+            
+    </script>
+}

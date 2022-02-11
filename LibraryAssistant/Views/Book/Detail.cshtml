@@ -1,0 +1,33 @@
+﻿@*USED IT AS DETAILS PAGE AT EARLY STAGE OF THE PROJECT*@
+
+
+@model Book
+
+@{ 
+    ViewBag.Title = "Details";
+}
+
+<div class="row justify-content-center m-3">
+    <div class="col-sm-8">
+        <div class="card">
+            <div class="card-header">
+                <h1>@Model.Title</h1>
+            </div>
+            
+            <div class="card-body">
+                <h3> ISBN : <span>@Model.ISBN</span></h3>
+                <h3> Cover Price : <span>@Model.CoverPrice</span></h3>
+                <h3> Publish Year : <span>@Model.PublishYear</span></h3>
+                <h3> Available : <span>@Model.Status</span></h3>
+            </div>
+
+            <div class="card-footer text-center">
+                <a asp-controller="book" asp-action="index" class="btn btn-primary">Back</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+ 
+
+
